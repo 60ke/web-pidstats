@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="./smoothie.js"></script>
+    <script type="text/javascript">
+      var cpuData = new TimeSeries();
+      // var cpuMaxData = new TimeSeries();
+      var memData = new TimeSeries();
+      // var memMaxData = new TimeSeries();
+      // var cpuMax = 0;
+      // var memMax= 0;
+      var conn = new WebSocket('ws://10.0.27.14:8080/');
+      function createTimeline() {
+          
+          conn.onmessage = function(evt) {
+            cpu_usage = evt.data.trim().split(/,/)[0]
+            mem_usage = evt.data.trim().split(/,/)[1]
+            // if (cpuMax < cpu_usage){
+            //   cpuMax = cpu_usage
+            // }
+            // if (memMax < mem_usage){
+            //   memMax = mem_usage
+            // }            
+            cpuData.append(Date.now(), cpu_usage);
+            // cpuMaxData.append(Date.now(), cpuMax);
+            // console.log(memMax)
+            memData.append(Date.now(), mem_usage);
+            // memMaxData.append(Date.now(), memMax);
+            log.innerHTML = "cpu_usage:" + cpu_usage + "\n  mem_usage" + mem_usage
+          
+          
+        };
+        var cpuChart = new SmoothieChart({
+          minValue: 0.0,
+          maxValue: 1600.0,
+          grid: {
+            strokeStyle: 'rgb(125, 0, 0)',
+            fillStyle: 'rgb(0, 0, 0)',
+            lineWidth: 1,
+            millisPerLine: 1000,
+            verticalSections: 4
+          }          
+        });
+        var memChart = new SmoothieChart({
+          minValue: 0.0,
+          maxValue: 100.0,
+          grid: {
+            strokeStyle: 'rgb(125, 0, 0)',
+            fillStyle: 'rgb(0, 0, 0)',
+            lineWidth: 1,
+            millisPerLine: 1000,
+            verticalSections: 4
+          }          
+        });
+        var cpu = document.getElementById("cpuChart");
+        var mem = document.getElementById("memChart");
+        cpuChart.streamTo(cpu, 1000);
+        memChart.streamTo(mem, 1000);
+        cpuChart.addTimeSeries(cpuData, { strokeStyle: 'rgba(0, 255, 255, 1)', fillStyle: 'rgba(255, 0, 0, 0.1)', lineWidth: 3 });
+        // cpuChart.addTimeSeries(cpuMaxData, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.1)', lineWidth: 1 });
+        memChart.addTimeSeries(memData, { strokeStyle: 'rgba(0, 0, 255, 1)', fillStyle: 'rgba(0, 0, 255, 0.1)', lineWidth: 3 });
+        // memChart.addTimeSeries(memMaxData, { strokeStyle: 'rgba(255, 255, 0, 1)', fillStyle: 'rgba(255, 255, 0, 0.1)', lineWidth: 3 });
+         
+      }
+      conn.onclose = function(evt) {
+        log.innerHTML = "Connection closed";
+      };
+
+     
+    </script>
+  </head>
+  <body onload="createTimeline()" style="background-color:#ffffff">
+    <div id="log" style="font-family:Courier,monospace;color:rgb(255, 174, 0)" ></div>
+    <canvas id="cpuChart" width="500" height="100"></canvas>
+    <canvas id="memChart" width="500" height="100"></canvas>
+
+  </body>
+</html>
