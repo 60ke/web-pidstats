@@ -9,7 +9,7 @@
       // var memMaxData = new TimeSeries();
       // var cpuMax = 0;
       // var memMax= 0;
-      var conn = new WebSocket('ws://10.0.27.14:8080/');
+      var conn = new WebSocket('ws://localhost:9232/');
       function createTimeline() {
           
           conn.onmessage = function(evt) {
